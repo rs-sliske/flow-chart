@@ -107,8 +107,8 @@ public class Main implements KeyListener {
 		Node startFloor = new Node("start floor", TYPE.ACTION, difficultySet, true);
 		Node soloing = new Node("soloing?", TYPE.CONDITION, inParty, false);
 		Node createTeam = new Node("create team", TYPE.ACTION, soloing, true);
-		leader.move(100, 0, true);
-		teamFull.move(100, 0, true);
+		leader.move(150, 0, true);
+		//teamFull.move(100, 0, true);
 		
 		Node waitForTeam = new Node("wait", TYPE.ACTION, leader, false);
 		Node setFloor = new Node("set floor", TYPE.ACTION, floorSet, false);
