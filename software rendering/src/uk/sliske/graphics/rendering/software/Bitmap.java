@@ -112,6 +112,22 @@ public class Bitmap {
 		}
 		return components[index];
 	}
+	
+	public void fill(double a, double b, double g, double r){
+		for(int x = 0;x<width;x++){
+			for(int y = 0;y<height;y++){
+				drawPixel(x, y, a, b, g, r);
+			}
+		}
+	}
+	
+	public void fill(int color){
+
+			int red = ((color) & 0xFF);
+			int green =  ((color >> 8) & 0xFF);
+			int blue =  ((color >> 16) & 0xFF);
+			fill(0,blue,green,red);
+	}
 
 	public void drawPixel(int x, int y, double a, double b, double g, double r) {
 		drawPixel(x, y, (byte) a, (byte) b, (byte) g, (byte) r);

@@ -5,20 +5,20 @@ import java.awt.Graphics;
 
 public abstract class Renderable {
 
-	protected final Color color;
-	
-	protected Renderable(Color c){
+	protected final Color	color;
+
+	protected Renderable(Color c) {
 		this.color = c;
 	}
-	
+
 	protected abstract void draw(Graphics g);
-	
-	public final void render(Graphics g){
-		if(g == null){
+
+	public final void render(Graphics g) {
+		if (g == null) {
 			return;
 		}
 		g.setColor(color);
 		draw(g);
 	}
-	
+
 }

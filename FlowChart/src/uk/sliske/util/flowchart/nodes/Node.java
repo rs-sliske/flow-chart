@@ -1,8 +1,8 @@
 package uk.sliske.util.flowchart.nodes;
 
 import java.awt.Color;
-import java.util.Collection;
 import java.util.HashMap;
+import java.util.Map.Entry;
 
 import uk.sliske.graphics.rendering.software.GraphicsMGR;
 import uk.sliske.graphics.rendering.software.Line;
@@ -10,60 +10,63 @@ import uk.sliske.graphics.rendering.software.Offset;
 import uk.sliske.util.flowchart.graphics.NodeGraphics;
 
 public class Node {
+	
+	private static final int Y_OFFSET = 60;
 
 	protected HashMap<String, Node>	children;
 
 	protected String				text;
 	protected TYPE					type;
 	protected NodeGraphics			graphics;
+	private boolean					yes;
 
-	public Node(final String text, final TYPE type, final Node parent) {
+	public Node(final String text, final TYPE type, final Node parent, boolean yes) {
 		this.text = text;
 		this.children = new HashMap<String, Node>();
 		this.type = type;
-		
-		Offset pos = new Offset(590, 100);		
+		this.yes = yes;
+
+		Offset pos = new Offset(590, Y_OFFSET);
 		if (parent != null) {
-			parent.children.put(this.toString(), this);
-			switch(parent.children.size()){
+			parent.children.put(Boolean.toString(yes), this);
+			switch (parent.children.size()) {
 				case 1:
-					pos = parent.graphics.getPos().offset(0, 100);
+					pos = parent.graphics.getPos().offset(0, Y_OFFSET);
 					break;
 				case 2:
-					for(Node n:parent.children.values()){
-						if(n == this){
-							pos = parent.graphics.getPos().offset(75, 100);
+					for (Node n : parent.children.values()) {
+						if (n.yes) {
+							pos = parent.graphics.getPos().offset(75, Y_OFFSET);
 						} else {
-							n.graphics.getPos().set(parent.graphics.getPos().offset(-75, 100));
+							pos = parent.graphics.getPos().offset(-75, Y_OFFSET);
 						}
-						
+						if (n != this) {
+							n.graphics.getPos().set(pos);
+						}
 					}
 					break;
 			}
 		}
-		
-		
-		
-		
+
 		graphics = new NodeGraphics(this, pos);
 	}
 
 	public Node(final String text) {
-		this(text, TYPE.DEFAULT, null);
+		this(text, TYPE.DEFAULT, null, true);
 	}
-	
-	public void addChild(String key, Node child){
+
+	public void addChild(String key, Node child) {
 		children.put(key, child);
 	}
-	
-	public void setParent(String key, Node parent){
+
+	public void setParent(String key, Node parent) {
 		parent.addChild(key, this);
 	}
-	
-	public void move(int xAmt, int yAmt, boolean moveChildren){
+
+	public void move(int xAmt, int yAmt, boolean moveChildren) {
 		graphics.getPos().set(graphics.getPos().offset(xAmt, yAmt));
-		if(moveChildren){
-			for(Node n:children.values()){
+		if (moveChildren) {
+			for (Node n : children.values()) {
 				n.move(xAmt, yAmt, moveChildren);
 			}
 		}
@@ -71,8 +74,10 @@ public class Node {
 
 	public void render(GraphicsMGR mgr) {
 		graphics.render(mgr);
-		Color c = new Color(0x00);
-		for (Node n : children.values()) {
+
+		for (Entry<String, Node> e : children.entrySet()) {
+			Color c = e.getKey().toString() == "true" ? Color.GREEN : Color.RED;
+			Node n = e.getValue();
 			n.render(mgr);
 			mgr.drawRenderable(new Line(graphics.getCentre(), n.graphics.getCentre(), c));
 		}

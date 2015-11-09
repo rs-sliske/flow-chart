@@ -45,7 +45,7 @@ public class GraphicsMGR {
 
 	public void update() {
 		display.swapBuffers();
-		Graphics g = getCanvas().getGraphics();
+		Graphics g = display.getGraphics();
 
 		for (Renderable r : renderables) {
 			r.render(g);

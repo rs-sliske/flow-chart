@@ -3,6 +3,7 @@ package uk.sliske.graphics.rendering.software;
 import java.awt.Canvas;
 import java.awt.Dimension;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.image.BufferStrategy;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
@@ -37,7 +38,7 @@ public class Display extends Canvas {
 		if(graphics == null){
 			createBufferStrategy(1);
 			bufferStrategy = getBufferStrategy();
-			graphics = bufferStrategy.getDrawGraphics();
+			graphics = (Graphics2D) bufferStrategy.getDrawGraphics();
 			return;
 		}
 		frameBuffer.copyToByteArray(displayComponents);
@@ -49,7 +50,8 @@ public class Display extends Canvas {
 		return frameBuffer;
 	}
 	
-	public void setGraphics(Graphics g){
+	
+	public void setGraphics(Graphics2D g){
 		this.graphics = g;
 	}
 }

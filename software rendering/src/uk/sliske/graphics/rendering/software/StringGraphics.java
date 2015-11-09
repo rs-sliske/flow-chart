@@ -3,9 +3,7 @@ package uk.sliske.graphics.rendering.software;
 import java.awt.Color;
 import java.awt.Graphics;
 
-import uk.sliske.graphics.rendering.software.Offset;
-
-public class StringGraphics extends Renderable{
+public class StringGraphics extends Renderable {
 
 	public final String	text;
 	public final Offset	position;

@@ -27,7 +27,7 @@ public class NodeGraphics extends Bitmap {
 
 		c = new Color(textColor);
 
-		clear(backgroundColor);
+		fill(backgroundColor);
 
 	}
 	
@@ -45,6 +45,10 @@ public class NodeGraphics extends Bitmap {
 		switch (node.node.getType()) {
 			case TITLE:
 				node.backgroundColor = 0x00;
+				node.textColor = 0xffffff;
+				break;
+			case ACTION:
+				node.backgroundColor = 0xff0000;
 				node.textColor = 0xffffff;
 				break;
 			default:
