@@ -2,28 +2,44 @@ package uk.sliske.util.flowchart;
 
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.HashMap;
+import java.util.Map.Entry;
+import java.util.Scanner;
 
 import uk.sliske.graphics.rendering.software.Frame;
 import uk.sliske.graphics.rendering.software.GraphicsMGR;
+import uk.sliske.util.Constants;
 import uk.sliske.util.flowchart.nodes.Node;
 import uk.sliske.util.flowchart.nodes.Node.TYPE;
+import uk.sliske.util.io.FileSaver;
 
 public class Main implements KeyListener {
 
-	private Node	root;
-	private Frame	frame;
-	private long	startTime;
-	private long	timeOffset;
-	private boolean paused = false;
+	private Node					root;
+	private Frame					frame;
+	private long					startTime;
+	private long					timeOffset;
+	private boolean					paused	= false;
+	private HashMap<String, Node>	nodes;
 
 	private Main(final String title) {
-		root = new Node(title, Node.TYPE.TITLE, null, false);
+		nodes = new HashMap<>();
+		root = new Node("root", title, Node.TYPE.TITLE, null, false);
+		nodes.put("root", root);
+		String filename = title + " - plans.txt";
 
-		createDgStack();
+		load(filename);
+		
+		if(nodes.size() <= 1){
+			createDgStack();
+		}
+	
 
 		GraphicsMGR mgr = new GraphicsMGR(1280, 960);
 
-		frame = new Frame("dg flow chart", mgr.getCanvas());
+		frame = new Frame(title+" - flow chart", mgr.getCanvas());
 		mgr.getCanvas().addKeyListener(this);
 
 		startTime = System.currentTimeMillis();
@@ -32,8 +48,66 @@ public class Main implements KeyListener {
 		mgr.getContext().clear(0x00);
 
 		while (loop(mgr) && frame.frame.isActive() && !paused) {
-
+			if (!frame.frame.isVisible()) {
+				break;
+			}
 		}
+		frame.frame.dispose();
+
+		save(filename);
+	}
+
+	private void load(String filename) {
+		String path = Constants.USER_PATH + "//script plans//" + filename;
+
+		File file = new File(path);
+
+		Scanner scanner;
+		try {
+			scanner = new Scanner(file);
+
+			while (scanner.hasNextLine()) {
+
+				String[] tokens = scanner.nextLine().split("  ");
+				if (tokens[0] == "-n" && tokens.length == 6) {
+					TYPE type;
+					switch (tokens[3].toLowerCase()) {
+						case "action":
+							type = TYPE.ACTION;
+							break;
+						case "condition":
+							type = TYPE.CONDITION;
+							break;
+						case "title":
+							type = TYPE.TITLE;
+							break;
+						default:
+							type = TYPE.DEFAULT;
+							break;
+					}
+					boolean b = tokens[5].equalsIgnoreCase("true") ? true : false;
+					createNode(tokens[1], tokens[2], type, tokens[4], b);
+
+				}
+
+			}
+			scanner.close();
+
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+	}
+
+	private void save(String filename) {
+		FileSaver file = new FileSaver(filename, "script plans\\");
+		for (Entry<String, Node> e : nodes.entrySet()) {
+			Node n = e.getValue();
+			file.appendf("-n  %s  %s  %s  %s  %s\n", e.getKey(), n.getText(), n.getType().name(), n
+					.getParent() == null ? "null" : n.getParent().key, n.yes());
+		}
+		file.close();
 	}
 
 	private boolean loop(GraphicsMGR mgr) {
@@ -64,8 +138,8 @@ public class Main implements KeyListener {
 
 	public static void main(String[] args) {
 		new Main("DG");
-		
-		//System.out.println(true);
+
+		// System.out.println(true);
 	}
 
 	@Override
@@ -95,26 +169,27 @@ public class Main implements KeyListener {
 
 	}
 
+	private void createNode(final String key, final String text, final TYPE type, final String parent, final boolean condition) {
+		Node parentNode = nodes.containsKey(parent) ? nodes.get(parent) : null;
+		nodes.put(key, new Node(key, text, type, parentNode, condition));
+	}
+
 	private void createDgStack() {
-		Node inside = new Node("in a dungeon?", TYPE.CONDITION, root, true);
-		Node waitingArea = new Node("in waiting area?", TYPE.CONDITION, inside, false);
-		new Node("do floor", Node.TYPE.ACTION, inside, true);
-		Node inParty = new Node("in party?", TYPE.CONDITION, waitingArea, true);
-		Node teamFull = new Node("team full?", TYPE.CONDITION, inParty, true);
-		Node leader = new Node("leader?", TYPE.CONDITION, teamFull, true);
-		Node floorSet = new Node("floor set?", TYPE.CONDITION, leader, true);
-		Node difficultySet = new Node("difficulty set?", TYPE.CONDITION, floorSet, true);
-		Node startFloor = new Node("start floor", TYPE.ACTION, difficultySet, true);
-		Node soloing = new Node("soloing?", TYPE.CONDITION, inParty, false);
-		Node createTeam = new Node("create team", TYPE.ACTION, soloing, true);
-		leader.move(150, 0, true);
-		//teamFull.move(100, 0, true);
-		
-		Node waitForTeam = new Node("wait", TYPE.ACTION, leader, false);
-		Node setFloor = new Node("set floor", TYPE.ACTION, floorSet, false);
-		Node setDifficulty = new Node("set difficulty", TYPE.ACTION, difficultySet, false);
-		
-		
+		createNode("inside", "in a dungeon?", TYPE.CONDITION, "root", true);
+		createNode("waitingArea", "in waiting area?", TYPE.CONDITION, "inside", false);
+		createNode("do floor", "do floor", TYPE.ACTION, "inside", true);
+		createNode("inParty", "in party?", TYPE.CONDITION, "waitingArea", true);
+		createNode("teamFull", "team full?", TYPE.CONDITION, "inParty", true);
+		createNode("leader", "leader?", TYPE.CONDITION, "teamFull", true);
+		createNode("floorSet", "floor set?", TYPE.CONDITION, "leader", true);
+		createNode("difficultySet", "difficulty set?", TYPE.CONDITION, "floorSet", true);
+		createNode("startFloor", "start floor", TYPE.ACTION, "difficultySet", true);
+		createNode("soloing", "soloing?", TYPE.CONDITION, "inParty", false);
+		createNode("createTeam", "create team", TYPE.ACTION, "soloing", true);
+		nodes.get("leader").move(150, 0, true);
+		createNode("waitForTeam", "wait", TYPE.ACTION, "leader", false);
+		createNode("setFloor", "set floor", TYPE.ACTION, "floorSet", false);
+		createNode("setDifficulty", "set difficulty", TYPE.ACTION, "difficultySet", false);
 
 	}
 

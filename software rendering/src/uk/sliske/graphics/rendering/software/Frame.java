@@ -12,7 +12,7 @@ public class Frame {
 		frame.add(canvas);
 
 		frame.setResizable(false);
-		frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+		frame.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
 
 		frame.setTitle(title);
 		frame.setVisible(true);

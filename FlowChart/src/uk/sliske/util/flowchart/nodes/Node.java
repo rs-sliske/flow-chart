@@ -10,8 +10,8 @@ import uk.sliske.graphics.rendering.software.Offset;
 import uk.sliske.util.flowchart.graphics.NodeGraphics;
 
 public class Node {
-	
-	private static final int Y_OFFSET = 60;
+
+	private static final int		Y_OFFSET	= 60;
 
 	protected HashMap<String, Node>	children;
 
@@ -19,12 +19,16 @@ public class Node {
 	protected TYPE					type;
 	protected NodeGraphics			graphics;
 	private boolean					yes;
+	protected Node					parent;
+	public final String key;
 
-	public Node(final String text, final TYPE type, final Node parent, boolean yes) {
+	public Node(final String key, final String text, final TYPE type, final Node parent, boolean yes) {
 		this.text = text;
 		this.children = new HashMap<String, Node>();
 		this.type = type;
 		this.yes = yes;
+		this.parent = parent;
+		this.key = key;
 
 		Offset pos = new Offset(590, Y_OFFSET);
 		if (parent != null) {
@@ -51,18 +55,23 @@ public class Node {
 		graphics = new NodeGraphics(this, pos);
 	}
 
-	public Node(final String text) {
-		this(text, TYPE.DEFAULT, null, true);
-	}
-
 	public void addChild(String key, Node child) {
 		children.put(key, child);
 	}
 
 	public void setParent(String key, Node parent) {
 		parent.addChild(key, this);
+		this.parent = parent;
 	}
 
+	public Node getParent(){
+		return parent;
+	}
+	
+	public boolean yes(){
+		return yes;
+	}
+	
 	public void move(int xAmt, int yAmt, boolean moveChildren) {
 		graphics.getPos().set(graphics.getPos().offset(xAmt, yAmt));
 		if (moveChildren) {
